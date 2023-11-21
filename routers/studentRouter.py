@@ -1,16 +1,16 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, validator
-from db_controller import create_user, get_all_users, get_user_by_id, update_user, delete_user
+from fastapi import HTTPException
+from pydantic import BaseModel
 from peewee import DoesNotExist
 from typing import List
 from faker import Faker
 from fastapi.responses import JSONResponse
-from datetime import datetime
 from fastapi import APIRouter
-from db_model import Student
+from models.db_model import Student
+
 fake = Faker()
 
-router = APIRouter()
+router = APIRouter(tags=["student"])
+
 
 class StudentIn(BaseModel):
     first_name: str
@@ -31,11 +31,6 @@ class StudentIn(BaseModel):
     online: bool
     notes: str
 
-    @validator('date_of_initial_diagnosis', pre=True)
-    def format_date(cls, v):
-        if isinstance(v, datetime):
-            return v.strftime('%Y-%m-%d')
-        return v
 
 class StudentOut(StudentIn):
     id: int
@@ -44,14 +39,16 @@ class StudentOut(StudentIn):
 @router.get("/students", response_model=List[StudentOut])
 def read_students():
     students = Student.select()
-    for student in students:
-        student.date_of_initial_diagnosis = student.date_of_initial_diagnosis.isoformat()
+    # for student in students:
+    #     student.date_of_initial_diagnosis = student.date_of_initial_diagnosis.isoformat()
     return list(students)
+
 
 @router.post("/students/", response_model=StudentOut)
 def create_student(student: StudentIn):
     student_obj = Student.create(**student.dict())
     return student_obj
+
 
 @router.get("/students/{student_id}", response_model=StudentOut)
 def read_student(student_id: int):
@@ -112,5 +109,4 @@ def delete_student(student_id: int):
         return {"message": "Student deleted successfully"}
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="Student not found")
-
 

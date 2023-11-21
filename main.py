@@ -1,142 +1,46 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, validator
-from db_controller import create_user, get_all_users, get_user_by_id, update_user, delete_user
-from peewee import DoesNotExist
-from typing import List
+from fastapi import FastAPI
 from faker import Faker
-from fastapi.responses import JSONResponse
-from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware
-from routers.student.studentRouter import router as studentRouter
+from routers.studentRouter import router as student_router
+from routers.employee_router import router as employee_router
+from routers.session_router import router as session_router
+from routers.fake_data import router as fake_router
+
 fake = Faker()
+
+tags_metadata = [
+    {
+        "name": "student",
+        "description": "Students of the center",
+    },
+    {
+        "name": "employee",
+        "description": "Employees if center",
+        "externalDocs": {
+            "description": "forward to site",
+            "url": "https://goldenspeak.ru/",
+        },
+    },
+    {
+        "name": "session",
+        "description": "Sessions",
+    },
+    {
+        "name": "fake_data",
+        "description": "fake_data",
+    },
+]
 
 app = FastAPI(
     title="My Super Project",
     description="This is a very fancy project, with auto docs for the API and everything",
     version="2.5.0",
-)
-app.include_router(studentRouter)
-origins = [
-    "http://localhost:3000",  # React
-    "http://localhost:8000",  # Angular
-    "http://localhost:8080",  # Vue.js
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    openapi_tags=tags_metadata,
 )
 
-from db_model import Student
-
-
-class StudentIn(BaseModel):
-    first_name: str
-    last_name: str
-    parents_name: str
-    age: int
-    status: str
-    session_transfer_rate: float
-    percentage_of_absences: float
-    contact_email: str
-    contact_telephone: str
-    allow_telegram_notification: bool
-    telegram_id: int
-    issue: str
-    date_of_initial_diagnosis: str
-    address: str
-    found_us_through: str
-    online: bool
-    notes: str
-
-    @validator('date_of_initial_diagnosis', pre=True)
-    def format_date(cls, v):
-        if isinstance(v, datetime):
-            return v.strftime('%Y-%m-%d')
-        return v
-
-class StudentOut(StudentIn):
-    id: int
-
-
-# @app.get("/students", response_model=List[StudentOut])
-# def read_students():
-#     students = Student.select()
-#     for student in students:
-#         student.date_of_initial_diagnosis = student.date_of_initial_diagnosis.isoformat()
-#     return list(students)
-
-
-
-# @app.post("/students/", response_model=StudentOut)
-# def create_student(student: StudentIn):
-#     student_obj = Student.create(**student.dict())
-#     return student_obj
-
-
-# @app.get("/students/{student_id}", response_model=StudentOut)
-# def read_student(student_id: int):
-#     try:
-#         student = Student.get(Student.id == student_id)
-#         student.date_of_initial_diagnosis = student.date_of_initial_diagnosis.isoformat()
-#         return student
-#     except:
-#         return JSONResponse(content={'status': "not found"}, status_code=404)
-
-#
-# @app.patch("/students/{student_id}", response_model=StudentOut)
-# def update_student(student_id: int, student: StudentIn):
-#     try:
-#         student_obj = Student.get(Student.id == student_id)
-#         student_obj.update(**student.dict()).execute()
-#         return JSONResponse(content={'status': "updated"}, status_code=200)
-#     except DoesNotExist:
-#         raise HTTPException(status_code=404, detail="Student not found")
-#
-
-# @app.delete("/students/{student_id}")
-# def delete_student(student_id: int):
-#     try:
-#         student = Student.get(Student.id == student_id)
-#         student.delete_instance()
-#         return {"message": "Student deleted successfully"}
-#     except DoesNotExist:
-#         raise HTTPException(status_code=404, detail="Student not found")
-#
-
-# def create_random_student() -> StudentIn:
-#     return StudentIn(
-#         first_name=fake.first_name(),
-#         last_name=fake.last_name(),
-#         parents_name=fake.name(),
-#         age=fake.random_int(min=5, max=20),
-#         status=fake.random_element(elements=('active', 'inactive')),
-#         session_transfer_rate=fake.random_number(digits=2),
-#         percentage_of_absences=fake.random_number(digits=2),
-#         contact_email=fake.email(),
-#         contact_telephone=fake.phone_number(),
-#         allow_telegram_notification=fake.boolean(),
-#         telegram_id=fake.random_int(),
-#         issue=fake.sentence(),
-#         date_of_initial_diagnosis=fake.date_time().isoformat(),
-#         address=fake.address(),
-#         found_us_through=fake.sentence(),
-#         online=fake.boolean(),
-#         notes=fake.text(),
-#     )
-#
-#
-# @app.post("/students/fill", response_model=List[StudentOut])
-# def fill_students():
-#     students = []
-#     for _ in range(20):
-#         student_in = create_random_student()
-#         student_out = create_student(student_in)
-#         students.append(student_out)
-#     return JSONResponse(content={'status': "ok"})
+app.include_router(student_router)
+app.include_router(employee_router)
+app.include_router(session_router)
+app.include_router(fake_router)
 
 
 def print_hi(name):
@@ -145,43 +49,3 @@ def print_hi(name):
 
 if __name__ == '__main__':
     print_hi('PyCharm')
-
-#
-# from fastapi import APIRouter
-# from .main import StudentIn, StudentOut, create_random_student, Student
-# from fastapi.responses import JSONResponse
-# from peewee import DoesNotExist
-#
-# router = APIRouter()
-#
-# @router.get("/students", response_model=List[StudentOut])
-# def read_students():
-#     # ...
-#
-# @router.post("/students/", response_model=StudentOut)
-# def create_student(student: StudentIn):
-#     # ...
-#
-# @router.get("/students/{student_id}", response_model=StudentOut)
-# def read_student(student_id: int):
-#     # ...
-#
-# @router.patch("/students/{student_id}", response_model=StudentOut)
-# def update_student(student_id: int, student: StudentIn):
-#     # ...
-#
-# @router.delete("/students/{student_id}")
-# def delete_student(student_id: int):
-#     # ...
-#
-# @router.post("/students/fill", response_model=List[StudentOut])
-# def fill_students():
-    # ...
-
-#
-# from fastapi import FastAPI
-# from .routes import router
-#
-# app = FastAPI()
-#
-# app.include_router(router)

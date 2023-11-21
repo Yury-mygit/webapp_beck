@@ -1,0 +1,109 @@
+# Create a current model
+class User(BaseModel):
+    name = CharField()
+    age = IntegerField()
+    gender = CharField()
+    created_date = DateTimeField(default=d)
+
+
+class Rights(BaseModel):
+    right = CharField(max_length=3)
+
+
+class UserRights(BaseModel):
+    user = ForeignKeyField(User, backref='rights')
+    right = ForeignKeyField(Rights, backref='users')
+
+
+
+
+
+
+
+
+
+
+
+
+
+import datetime
+from peewee import *
+
+# Create a PostgreSQL database connection
+db = PostgresqlDatabase('user', user='postgres', password='321', host='localhost', port=5400)
+d = datetime.datetime(2022, 12, 25, 17, 23, 22)
+
+
+# Create a BaseModel representing a table in the database
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+
+class Student(BaseModel):
+    id = AutoField()
+    first_name = CharField()
+    last_name = CharField()
+    parents_name = CharField()
+    age = IntegerField()
+    status = CharField()
+    session_transfer_rate = FloatField()
+    percentage_of_absences = FloatField()
+    contact_email = CharField()
+    contact_telephone = CharField()
+    allow_telegram_notification = BooleanField()
+    telegram_id = BigIntegerField()
+    issue = TextField()
+    date_of_initial_diagnosis = DateTimeField()
+    address = TextField()
+    found_us_through = TextField()
+    online = BooleanField()
+    notes = TextField()
+
+
+class Employee(BaseModel):
+    id = AutoField()
+    status = CharField()
+    position = CharField()
+    profession = CharField()
+    first_name = CharField()
+    last_name = CharField()
+    contact_email = CharField()
+    contact_telephone = CharField()
+    telegram_id = IntegerField()
+    online = BooleanField()
+    offline = BooleanField()
+
+
+
+
+class Session(BaseModel):
+    id = AutoField()
+    startDateTime = DateTimeField()
+    duration = IntegerField()
+    week_first_day = DateTimeField()
+    online = BooleanField()
+    paid = BooleanField()
+    confirmed = BooleanField()
+    student_id = ForeignKeyField(Student, backref='sessions')
+    employee_id = ForeignKeyField(Employee, backref='sessions')
+    repeatable = BooleanField()
+    notes = TextField()
+    office_id = IntegerField()
+    performed = BooleanField()
+    serviceType = IntegerField()
+    status = CharField()
+
+
+Student.create_table(fail_silently=True)
+Session.create_table(fail_silently=True)
+Employee.create_table(fail_silently=True)
+
+
+
+
+
+
+
+
+

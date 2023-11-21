@@ -1,4 +1,4 @@
-from db_model import User, Rights, UserRights
+from models.db_model import User, Rights, UserRights
 from playhouse.shortcuts import model_to_dict
 
 
