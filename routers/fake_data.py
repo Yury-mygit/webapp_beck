@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, time
-from models.db_model import Payment, Employee, Session, ServiceType, Status, Student, Office
+from models.db_model import Payment, Employee, Session, ServiceType, Status, Student, Office, PaymentStatus, SubscriptionType
 from fastapi import APIRouter
 from pydantic import BaseModel
 from faker import Faker
@@ -82,8 +82,10 @@ def create_random_session(date, students, employees):
     student = random.choice(students)
     employee = random.choice(employees)
 
-    # Generate a random office_id that exists in your Office tabl
-    # office_id = random.randint(1, Office.select().count())
+    # Generate a random office_id that exists in Office tabl
+    office_ids = [office.id for office in Office.select()]
+    random_office_id = random.choice(office_ids)
+
     # Generate a random number of sessions (2 or 3)
     num_sessions = random.choice([2, 3])
 
@@ -107,7 +109,7 @@ def create_random_session(date, students, employees):
             employee_id=employee.id,
             repeatable=random.choice([True, False]),
             notes=fake.text(),
-            office_id=1,
+            office_id=random_office_id,
             performed=startDateTime < datetime.now(),
             serviceType=random.choice(list(ServiceType)),
             status=random.choice(list(Status)),
@@ -122,6 +124,12 @@ def create_random_office():
         # Add any other fields as needed
     )
 
+def create_random_payment(student):
+    return Payment(
+        student_id=student.id,
+        status=random.choice(list(PaymentStatus)).value,
+        subscription_type=random.choice(list(SubscriptionType)).value
+    )
 
 @router.post("/filldb")
 def fill_db():
@@ -138,6 +146,7 @@ def fill_db():
     for office in offices:
         office.save()
 
+    print(offices.count)
     # Create sessions for the past 10 days and the next 5 days
     for i in range(-10, 6):
         date = datetime.now().date() + timedelta(days=i)
@@ -145,4 +154,29 @@ def fill_db():
         for session in sessions:
             session.save()
 
+
+        # Create payments for each student
+    for student in students:
+        num_sessions = Session.select().where(Session.student_id == student.id).count()
+        print(f"Student {student.id} has {num_sessions} sessions.")
+        num_payments = random.randint(1, 3)  # Each student makes 1-3 payments
+        for _ in range(num_payments):
+            payment = create_random_payment(student)
+            payment.save()
+
     return {"detail": "Database filled with test data"}
+
+
+
+
+
+@router.post("/cleardb")
+def clear_db():
+    # Delete all records from each table
+    Session.delete().execute()
+    Payment.delete().execute()
+    Office.delete().execute()
+    Employee.delete().execute()
+    Student.delete().execute()
+
+    return {"detail": "Database cleared"}
