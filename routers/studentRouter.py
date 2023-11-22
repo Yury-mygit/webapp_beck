@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
-from peewee import DoesNotExist
+from peewee import DoesNotExist, fn
 from typing import List
 from faker import Faker
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter
-from models.db_model import Student
+from models.db_model import Student, Session, Payment
 
 fake = Faker()
 
@@ -35,13 +35,21 @@ class StudentIn(BaseModel):
 class StudentOut(StudentIn):
     id: int
 
+class StudentOutAll(StudentIn):
+    id: int
+    session_available: int
 
-@router.get("/students", response_model=List[StudentOut])
+
+@router.get("/students",response_model=List[StudentOutAll])
 def read_students():
-    students = Student.select()
-    # for student in students:
-    #     student.date_of_initial_diagnosis = student.date_of_initial_diagnosis.isoformat()
-    return list(students)
+    response = []
+    for student in Student.select():
+        num_ses = Session.select().where(Session.student_id == student.id).count()
+        subscription_sum = Payment.select(fn.SUM(Payment.subscription_type)).where(Payment.student_id == student.id).scalar() or 0
+        student_out = StudentOutAll(**student.__data__, session_available=subscription_sum - num_ses)
+        response.append(student_out)
+
+    return response
 
 
 @router.post("/students/", response_model=StudentOut)
@@ -110,3 +118,10 @@ def delete_student(student_id: int):
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="Student not found")
 
+
+
+# @router.get("/students",response_model=List[StudentOut])
+# def read_students():
+#     students = Student.select()
+#     sessu
+#     return list(students)

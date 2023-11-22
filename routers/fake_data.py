@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from faker import Faker
 import random
 
+from routers.faker_lib import create_payment
+
 fake = Faker()
 router = APIRouter(tags=["fake_data"])
 
@@ -133,20 +135,27 @@ def create_random_payment(student):
 
 @router.post("/filldb")
 def fill_db():
+    Session.delete().execute()
+    Payment.delete().execute()
+    Office.delete().execute()
+    Employee.delete().execute()
+    Student.delete().execute()
+
     # Create 20 students and 5 employees
-    students = [create_random_student() for _ in range(20)]
+    students = [create_random_student() for _ in range(4)]
     for student in students:
         student.save()
 
-    employees = [create_random_employee() for _ in range(5)]
+    employees = [create_random_employee() for _ in range(2)]
     for employee in employees:
         employee.save()
 
+    # Fill office table
     offices = [create_random_office() for _ in range(3)]
     for office in offices:
         office.save()
 
-    print(offices.count)
+
     # Create sessions for the past 10 days and the next 5 days
     for i in range(-10, 6):
         date = datetime.now().date() + timedelta(days=i)
@@ -156,13 +165,63 @@ def fill_db():
 
 
         # Create payments for each student
-    for student in students:
-        num_sessions = Session.select().where(Session.student_id == student.id).count()
-        print(f"Student {student.id} has {num_sessions} sessions.")
-        num_payments = random.randint(1, 3)  # Each student makes 1-3 payments
-        for _ in range(num_payments):
-            payment = create_random_payment(student)
-            payment.save()
+    # for student in students:
+    #     num_sessions = Session.select().where(Session.student_id == student.id, Session.performed == False ).count()
+    #     print(num_sessions)
+    #     num_payments = random.randint(1, 3)  # Each student makes 1-3 payments
+    #     for _ in range(num_payments):
+    #         payment = create_random_payment(student)
+    #         payment.save()
+
+    def create_payment_loc(id):
+        payment = Payment(
+            student_id=id,
+            status='new',
+            subscription_type=random.choice(list(SubscriptionType)).value
+        )
+        payment.save()
+        return payment
+
+    for student in Student.select():
+        run = True
+        num_ses = Session.select().where(Session.student_id == student.id).count()
+        pays = []
+        count = 0
+        while num_ses >= count:
+            pay = create_payment_loc(student.id)
+            count += pay.subscription_type
+            if num_ses >=count:
+                pay.status = 'spent'
+            if num_ses < count:
+                pay.status = 'active'
+            pay.save()
+
+        print(num_ses, count)
+
+
+
+
+
+
+
+    # for student in students:
+    #     num_sessions = Session.select().where(Session.student_id == student.id ).count()
+    #     payments_made = Payment.select().where(student_id=student.id)
+    #
+    #     paid_session = 0 - num_sessions
+    #
+    #     while paid_session < 0:
+    #         pass
+    #
+    #     print('sessions count ',num_sessions)
+    #     num_payments = random.randint(1, 3)  # Each student makes 1-3 payments
+    #     for _ in range(num_payments):
+    #         payment = create_random_payment(student)
+    #         payment.save()
+    #
+    #     print('==================')
+
+
 
     return {"detail": "Database filled with test data"}
 

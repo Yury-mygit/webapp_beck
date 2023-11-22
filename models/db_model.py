@@ -87,9 +87,9 @@ class Payment(BaseModel):
 
 class Session(BaseModel):
     id = AutoField()
-    startDateTime = DateTimeField()
+    startDateTime = CharField()
     duration = IntegerField()
-    week_first_day = DateTimeField()
+    week_first_day = CharField()
     online = BooleanField()
     paid = BooleanField()
     confirmed = BooleanField()

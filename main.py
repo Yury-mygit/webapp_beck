@@ -4,6 +4,7 @@ from routers.studentRouter import router as student_router
 from routers.employee_router import router as employee_router
 from routers.session_router import router as session_router
 from routers.fake_data import router as fake_router
+from routers.payment_router import router as paynent_router
 
 fake = Faker()
 
@@ -41,6 +42,7 @@ app.include_router(student_router)
 app.include_router(employee_router)
 app.include_router(session_router)
 app.include_router(fake_router)
+app.include_router(paynent_router)
 
 
 def print_hi(name):
