@@ -29,6 +29,10 @@ tags_metadata = [
         "name": "fake_data",
         "description": "fake_data",
     },
+    {
+        "name": "payment",
+        "description": "Payments api",
+    },
 ]
 
 app = FastAPI(
