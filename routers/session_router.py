@@ -28,22 +28,7 @@ class SessionModel(BaseModel):
     status: str
 
 
-class SessionModelUpdate(BaseModel):
-    id: int
-    startDateTime: str
-    duration: int
-    week_first_day: str
-    online: bool
-    paid: bool
-    confirmed: bool
-    student_id: int
-    employee_id: int
-    repeatable: bool
-    notes: str
-    office_id: int
-    performed: bool
-    serviceType: str
-    status: str
+
 
 class SessionModel_OUT(SessionModel):
     id: int
@@ -80,12 +65,52 @@ def read_sessions():
         )
     return response
 
-# CREATE
-@router.patch("/sessions/")
-def create_session(session: SessionModel):
-    session_obj = Session.create(**session.model_dump())
-    return {'status': 'ok'}
 
+class SessionModelCreate(BaseModel):
+
+    startDateTime: str
+    duration: int
+    week_first_day: str
+    online: bool
+    paid: bool
+    confirmed: bool
+    student_id: int
+    employee_id: int
+    repeatable: bool
+    notes: str
+    office_id: int
+    performed: bool
+    serviceType: int
+    status: str
+
+class SessionModelUpdate(BaseModel):
+    id: int
+    startDateTime: str
+    duration: int
+    week_first_day: str
+    online: bool
+    paid: bool
+    confirmed: bool
+    student_id: int
+    employee_id: int
+    repeatable: bool
+    notes: str
+    office_id: int
+    performed: bool
+    serviceType: int
+    status: str
+
+# CREATE
+@router.put(
+    "/sessions",
+
+            # response_model=SessionModelUpdate
+)
+def create_session(session: SessionModelCreate):
+    session_obj = Session.create(**session.model_dump())
+    print(session_obj)  # contain an id of new record
+    # return {'status': 'ok'}
+    return session_obj
 
 def create_random_session():
     # Fill with your random data generator logic
@@ -100,8 +125,17 @@ def fill_sessions():
     return JSONResponse(content={'status': "ok"})
 
 
+
+
+
+# @router.patch("/sessions")
+# def update_session(session: SessionModelUpdate):
+#     print('sssssss')
+#
+
+
 # UPDATE
-@router.patch("/sessions/{session_id}", response_model=SessionModelUpdate)
+@router.patch("/sessions", response_model=SessionModelUpdate)
 def update_session(session: SessionModelUpdate):
     try:
         session_obj = Session.get(Session.id == session.id)
