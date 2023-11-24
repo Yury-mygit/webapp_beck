@@ -40,7 +40,7 @@ class StudentOutAll(StudentIn):
     session_available: int
 
 
-@router.get("/students",response_model=List[StudentOutAll])
+@router.get("/students", response_model=List[StudentOutAll])
 def read_students():
     response = []
     for student in Student.select():

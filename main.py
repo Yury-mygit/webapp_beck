@@ -6,8 +6,7 @@ from routers.session_router import router as session_router
 from routers.fake_data import router as fake_router
 from routers.payment_router import router as payment_router
 from routers.login_router import router as login_router
-
-
+from fastapi.middleware.cors import CORSMiddleware
 fake = Faker()
 
 tags_metadata = [
@@ -49,6 +48,19 @@ app = FastAPI(
 )
 
 
+origins = [
+    "http://localhost:3000",  # React
+    "http://localhost:8000",  # Angular
+    "http://localhost:8080",  # Vue.js
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 
