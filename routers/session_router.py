@@ -81,7 +81,7 @@ def read_sessions():
     return response
 
 # CREATE
-@router.post("/sessions/")
+@router.patch("/sessions/")
 def create_session(session: SessionModel):
     session_obj = Session.create(**session.model_dump())
     return {'status': 'ok'}
