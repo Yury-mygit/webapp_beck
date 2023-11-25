@@ -11,6 +11,7 @@ fake = Faker()
 
 
 class SessionModel(BaseModel):
+
     startDateTime: str
     duration: int
     week_first_day: str
@@ -25,6 +26,8 @@ class SessionModel(BaseModel):
     performed: bool
     serviceType: str
     status: str
+
+
 
 
 class SessionModel_OUT(SessionModel):
@@ -62,12 +65,76 @@ def read_sessions():
         )
     return response
 
+@router.get("/sessions/{session_id}", response_model=SessionModel_OUT)
+def get_session_by_id(session_id: int):
+    try:
+        session = Session.get(Session.id == session_id)
+        return SessionModel_OUT(
+            id=session.id,
+            startDateTime=session.startDateTime,
+            duration=session.duration,
+            week_first_day=session.week_first_day,
+            online=session.online,
+            paid=session.paid,
+            confirmed=session.confirmed,
+            student_id=session.student_id.id,
+            employee_id=session.employee_id.id,
+            repeatable=session.repeatable,
+            notes=session.notes,
+            office_id=session.office_id.id,
+            performed=session.performed,
+            serviceType=session.serviceType,
+            status=session.status,
+        )
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="Session not found")
 
-@router.post("/sessions/")
-def create_session(session: SessionModel):
-    session_obj = Session.create(**session.dict())
-    return {'status': 'ok'}
 
+class SessionModelCreate(BaseModel):
+
+    startDateTime: str
+    duration: int
+    week_first_day: str
+    online: bool
+    paid: bool
+    confirmed: bool
+    student_id: int
+    employee_id: int
+    repeatable: bool
+    notes: str
+    office_id: int
+    performed: bool
+    serviceType: int
+    status: str
+
+class SessionModelUpdate(BaseModel):
+    id: int
+    startDateTime: str
+    duration: int
+    week_first_day: str
+    online: bool
+    paid: bool
+    confirmed: bool
+    student_id: int
+    employee_id: int
+    repeatable: bool
+    notes: str
+    office_id: int
+    performed: bool
+    serviceType: int
+    status: str
+
+# CREATE
+@router.put(
+    "/sessions",
+
+            # response_model=SessionModelUpdate
+)
+def create_session(session: SessionModelCreate):
+    session_obj = Session.create(**session.model_dump())
+    print(session_obj)  # contain an id of new record
+    # return {'status': 'ok'}
+    return session_obj
 
 def create_random_session():
     # Fill with your random data generator logic
@@ -82,11 +149,25 @@ def fill_sessions():
     return JSONResponse(content={'status': "ok"})
 
 
-@router.patch("/sessions/{session_id}", response_model=SessionModel_OUT)
-def update_session(session_id: int, session: SessionModel):
+
+
+
+# @router.patch("/sessions")
+# def update_session(session: SessionModelUpdate):
+#     print('sssssss')
+#
+
+
+# UPDATE
+@router.patch("/sessions", response_model=SessionModelUpdate)
+def update_session(session: SessionModelUpdate):
     try:
-        session_obj = Session.get(Session.id == session_id)
-        session_obj.update(**session.dict()).execute()
+        session_obj = Session.get(Session.id == session.id)
+
+        # Create a copy of the session dictionary without the 'id' field
+        session_dict = {key: value for key, value in session.model_dump().items() if key != 'id'}
+
+        session_obj.update(**session_dict).execute()
         return JSONResponse(content={'status': "updated"}, status_code=200)
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="Session not found")

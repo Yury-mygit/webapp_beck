@@ -4,11 +4,14 @@ from routers.studentRouter import router as student_router
 from routers.employee_router import router as employee_router
 from routers.session_router import router as session_router
 from routers.fake_data import router as fake_router
-from routers.payment_router import router as paynent_router
-
-fake = Faker()
-
+from routers.payment_router import router as payment_router
+from routers.login_router import router as login_router
+from fastapi.middleware.cors import CORSMiddleware
 tags_metadata = [
+{
+        "name": "session",
+        "description": "Sessions",
+    },
     {
         "name": "student",
         "description": "Students of the center",
@@ -21,15 +24,22 @@ tags_metadata = [
             "url": "https://goldenspeak.ru/",
         },
     },
-    {
-        "name": "session",
-        "description": "Sessions",
-    },
+
     {
         "name": "fake_data",
         "description": "fake_data",
     },
+    {
+        "name": "payment",
+        "description": "Payments api",
+    },
+    {
+        "name": "login",
+        "description": "Login api",
+    },
 ]
+fake = Faker()
+
 
 app = FastAPI(
     title="My Super Project",
@@ -38,11 +48,29 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
+
+origins = [
+    "http://localhost:3000",  # React
+    "http://localhost:8000",  # Angular
+    "http://localhost:8080",  # Vue.js
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+app.include_router(session_router)
 app.include_router(student_router)
 app.include_router(employee_router)
-app.include_router(session_router)
 app.include_router(fake_router)
-app.include_router(paynent_router)
+app.include_router(payment_router)
+app.include_router(login_router)
 
 
 def print_hi(name):
