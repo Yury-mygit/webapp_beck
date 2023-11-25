@@ -65,6 +65,30 @@ def read_sessions():
         )
     return response
 
+@router.get("/sessions/{session_id}", response_model=SessionModel_OUT)
+def get_session_by_id(session_id: int):
+    try:
+        session = Session.get(Session.id == session_id)
+        return SessionModel_OUT(
+            id=session.id,
+            startDateTime=session.startDateTime,
+            duration=session.duration,
+            week_first_day=session.week_first_day,
+            online=session.online,
+            paid=session.paid,
+            confirmed=session.confirmed,
+            student_id=session.student_id.id,
+            employee_id=session.employee_id.id,
+            repeatable=session.repeatable,
+            notes=session.notes,
+            office_id=session.office_id.id,
+            performed=session.performed,
+            serviceType=session.serviceType,
+            status=session.status,
+        )
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="Session not found")
+
 
 class SessionModelCreate(BaseModel):
 

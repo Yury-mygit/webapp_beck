@@ -7,9 +7,11 @@ from routers.fake_data import router as fake_router
 from routers.payment_router import router as payment_router
 from routers.login_router import router as login_router
 from fastapi.middleware.cors import CORSMiddleware
-fake = Faker()
-
 tags_metadata = [
+{
+        "name": "session",
+        "description": "Sessions",
+    },
     {
         "name": "student",
         "description": "Students of the center",
@@ -22,10 +24,7 @@ tags_metadata = [
             "url": "https://goldenspeak.ru/",
         },
     },
-    {
-        "name": "session",
-        "description": "Sessions",
-    },
+
     {
         "name": "fake_data",
         "description": "fake_data",
@@ -39,6 +38,8 @@ tags_metadata = [
         "description": "Login api",
     },
 ]
+fake = Faker()
+
 
 app = FastAPI(
     title="My Super Project",
@@ -64,9 +65,9 @@ app.add_middleware(
 
 
 
+app.include_router(session_router)
 app.include_router(student_router)
 app.include_router(employee_router)
-app.include_router(session_router)
 app.include_router(fake_router)
 app.include_router(payment_router)
 app.include_router(login_router)
