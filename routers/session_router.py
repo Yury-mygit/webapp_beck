@@ -162,12 +162,27 @@ def fill_sessions():
 @router.patch("/sessions", response_model=SessionModelUpdate)
 def update_session(session: SessionModelUpdate):
     try:
+        # Verify the session exists
         session_obj = Session.get(Session.id == session.id)
 
         # Create a copy of the session dictionary without the 'id' field
-        session_dict = {key: value for key, value in session.model_dump().items() if key != 'id'}
+        session_dict = {key: value for key, value in session.dict().items() if key != 'id'}
 
-        session_obj.update(**session_dict).execute()
+        # Update the session
+        Session.update(**session_dict).where(Session.id == session.id).execute()
+
         return JSONResponse(content={'status': "updated"}, status_code=200)
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="Session not found")
+# @router.patch("/sessions", response_model=SessionModelUpdate)
+# def update_session(session: SessionModelUpdate):
+#     try:
+#         session_obj = Session.get(Session.id == session.id)
+#         print(session_obj)
+#         # Create a copy of the session dictionary without the 'id' field
+#         session_dict = {key: value for key, value in session.model_dump().items() if key != 'id'}
+#
+#         session_obj.update(**session_dict).execute()
+#         return JSONResponse(content={'status': "updated"}, status_code=200)
+#     except DoesNotExist:
+#         raise HTTPException(status_code=404, detail="Session not found")
