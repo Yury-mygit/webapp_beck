@@ -53,11 +53,12 @@ origins = [
     "http://localhost:3000",  # React
     "http://localhost:8000",  # Angular
     "http://localhost:8080",  # Vue.js
+    "https://6ce0-2a00-1fa0-485f-3f10-1ddd-8cb6-7e27-7522.ngrok-free.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -9,3 +9,6 @@ def create_payment(id):
         status='new',
         subscription_type=random.choice(list(SubscriptionType)).value
     )
+
+
+# Seccion creator

@@ -125,16 +125,16 @@ class SessionModelUpdate(BaseModel):
     status: str
 
 # CREATE
-@router.put(
-    "/sessions",
-
-            # response_model=SessionModelUpdate
+@router.put( "/sessions",     response_model=SessionModelUpdate
 )
 def create_session(session: SessionModelCreate):
-    session_obj = Session.create(**session.model_dump())
-    print(session_obj)  # contain an id of new record
-    # return {'status': 'ok'}
-    return session_obj
+    try:
+        session_obj = Session.create(**session.model_dump())
+        print(session_obj)  # contain an id of new record
+        # return {'status': 'ok'}
+        return JSONResponse(content={'status': "updated"}, status_code=200)
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="Session not found")
 
 def create_random_session():
     # Fill with your random data generator logic
@@ -149,15 +149,6 @@ def fill_sessions():
     return JSONResponse(content={'status': "ok"})
 
 
-
-
-
-# @router.patch("/sessions")
-# def update_session(session: SessionModelUpdate):
-#     print('sssssss')
-#
-
-
 # UPDATE
 @router.patch("/sessions", response_model=SessionModelUpdate)
 def update_session(session: SessionModelUpdate):
@@ -166,7 +157,7 @@ def update_session(session: SessionModelUpdate):
         session_obj = Session.get(Session.id == session.id)
 
         # Create a copy of the session dictionary without the 'id' field
-        session_dict = {key: value for key, value in session.dict().items() if key != 'id'}
+        session_dict = {key: value for key, value in session.model_dump().items() if key != 'id'}
 
         # Update the session
         Session.update(**session_dict).where(Session.id == session.id).execute()
@@ -174,15 +165,3 @@ def update_session(session: SessionModelUpdate):
         return JSONResponse(content={'status': "updated"}, status_code=200)
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="Session not found")
-# @router.patch("/sessions", response_model=SessionModelUpdate)
-# def update_session(session: SessionModelUpdate):
-#     try:
-#         session_obj = Session.get(Session.id == session.id)
-#         print(session_obj)
-#         # Create a copy of the session dictionary without the 'id' field
-#         session_dict = {key: value for key, value in session.model_dump().items() if key != 'id'}
-#
-#         session_obj.update(**session_dict).execute()
-#         return JSONResponse(content={'status': "updated"}, status_code=200)
-#     except DoesNotExist:
-#         raise HTTPException(status_code=404, detail="Session not found")
