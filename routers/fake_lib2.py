@@ -145,38 +145,12 @@ class Period:
                     continue
 
 
-        return [self.make_model(session) for session in self.sessionList]
+        listSes = [self.make_model(session) for session in self.sessionList]
 
 
+        print(listSes)
 
 
-
-
-def createrr():
-    period = Period()
-    print(f"Start of the period: {period.start}")
-    print(f"End of the period: {period.end}")
-
-    today, current_day_of_week, monday = get_dates()
-    print(f"Today's date: {today}")
-    print(f"Current day of the week: {current_day_of_week}")
-    print(f"Date of Monday of the current week: {monday}")
-
-    get_dates()
-    return 1
-
-
-def get_dates():
-    # Get today's date
-    today = datetime.today()
-
-    # Get the current day of the week (0 is Monday, 1 is Tuesday, ..., 6 is Sunday)
-    current_day_of_week = today.weekday()
-
-    # Get the date of Monday of the current week
-    monday = today - timedelta(days=current_day_of_week)
-
-    return today, current_day_of_week, monday
 
 
 

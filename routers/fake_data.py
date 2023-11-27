@@ -3,8 +3,9 @@ from models.db_model import Payment, Employee, Session, ServiceType, Status, Stu
 from fastapi import APIRouter
 from pydantic import BaseModel
 from faker import Faker
+from routers.faker_lib import createrr, Period
 import random
-
+from typing import List
 from routers.faker_lib import create_payment
 
 fake = Faker()
@@ -118,6 +119,8 @@ def create_random_session(date, students, employees):
         )
         sessions.append(session)
 
+
+
     return sessions
 
 def create_random_office():
@@ -132,6 +135,33 @@ def create_random_payment(student):
         status=random.choice(list(PaymentStatus)).value,
         subscription_type=random.choice(list(SubscriptionType)).value
     )
+
+
+class SessionModel(BaseModel):
+    id: int | None
+    first_name: str | None
+    day: int | None
+    time: time | None
+    student_id: int | None
+    employee_id: int | None
+    office_id: int | None
+
+
+
+
+
+@router.post("/v2/filldb", response_model=List[SessionModel])  # Update response_model to List[Student]
+def fill_db2():
+    period = Period()
+    period.create_session_list()
+    return period.sessionList
+
+@router.post("/v2/filldb2")  # Update response_model to List[Student]
+def fill_db2():
+    period = Period()
+
+    return period.create_session_list()
+
 
 @router.post("/filldb")
 def fill_db():
@@ -157,12 +187,17 @@ def fill_db():
 
 
     # Create sessions for the past 10 days and the next 5 days
-    for i in range(-10, 6):
-        date = datetime.now().date() + timedelta(days=i)
-        sessions = create_random_session(date, students, employees)
-        for session in sessions:
-            session.save()
+    # for i in range(-10, 6):
+    #     date = datetime.now().date() + timedelta(days=i)
+    #     sessions = create_random_session(date, students, employees)
+    #     for session in sessions:
+    #         session.save()
 
+    period = Period()
+
+    sessions = period.create_session_list()
+    for session in sessions:
+        session.save()
 
         # Create payments for each student
     # for student in students:
@@ -199,7 +234,7 @@ def fill_db():
         print(num_ses, count)
 
 
-
+    return {"detail": "Database filled with test data"}
 
 
 
@@ -223,7 +258,7 @@ def fill_db():
 
 
 
-    return {"detail": "Database filled with test data"}
+
 
 
 
